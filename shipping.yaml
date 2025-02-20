@@ -1,0 +1,204 @@
+openapi: 3.0.0
+info:
+  title: Package Management API
+  description: >-
+    This API manages packages. It allows for the creation, retrieval, updating,
+    and deletion of individual packages.
+  version: 1.0.0
+  contact:
+    name: Cymbal Logistics
+    url: cymballogistics.com
+paths:
+  /packages:
+    get:
+      description: Retrieve a list of all packages.
+      parameters:
+        - description: The number of items to return per API request.
+          in: query
+          name: pageSize
+          schema:
+            type: integer
+        - description: >-
+            A page token received from a previous API request, used to request a
+            subsequent page.
+          in: query
+          name: pageToken
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/package'
+                    type: array
+                  nextPageToken:
+                    type: string
+                type: object
+          description: A list of packages.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Unexpected error
+      security:
+        - ApiKeyAuth: []
+      tags:
+        - packages
+    post:
+      description: Create a new package.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/package'
+        description: Package details
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/package'
+          description: Package created successfully
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Invalid input
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+      tags:
+        - packages
+  /packages/{packageId}:
+    delete:
+      description: Delete a specific package by its ID.
+      operationId: deletePackage
+      responses:
+        '204':
+          description: Package deleted successfully
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Package not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+      tags:
+        - packages
+    get:
+      description: Retrieve a specific package by its ID.
+      operationId: getPackageById
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/package'
+          description: Successful operation
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Package not found
+      security:
+        - ApiKeyAuth: []
+      tags:
+        - packages
+    parameters:
+      - description: ID of the package to be updated
+        in: path
+        name: packageId
+        required: true
+        schema:
+          format: int64
+          type: integer
+    put:
+      description: Update a specific package by its ID.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/package'
+        description: Package object that needs to be updated
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/package'
+          description: Successful operation
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Invalid input
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Package not found
+      security:
+        - ApiKeyAuth: []
+      tags:
+        - packages
+components:
+  schemas:
+    error:
+      description: Error object
+      properties:
+        code:
+          description: The error code
+          type: string
+        message:
+          description: The error message
+          type: string
+      type: object
+    package:
+      properties:
+        depth:
+          description: Depth of the package.
+          format: int64
+          type: integer
+        height:
+          description: Height of the package.
+          format: int64
+          type: integer
+        special_handling_instructions:
+          type: string
+        weight:
+          description: Weight of the package.
+          format: int64
+          type: integer
+        width:
+          description: Width of the package.
+          format: int64
+          type: integer
+      type: object
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      name: X-API-Key
+      in: header
