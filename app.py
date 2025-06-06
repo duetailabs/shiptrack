@@ -1,9 +1,40 @@
 from flask import Flask, jsonify, abort, request
 import requests, time
 from data_model import Package
-from connect_connector import SessionMaker
+from connect_connector import SessionMaker, engine # Import engine
+import os # For environment variables
+
+# OpenTelemetry imports
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
 
 app = Flask(__name__)
+
+# OpenTelemetry Setup
+service_name = os.getenv("OTEL_SERVICE_NAME", "shipping-app")
+resource = Resource(attributes={
+    "service.name": service_name
+})
+otlp_exporter = OTLPSpanExporter(endpoint=os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4318/v1/traces"))
+tracer_provider = TracerProvider(resource=resource)
+span_processor = BatchSpanProcessor(otlp_exporter)
+tracer_provider.add_span_processor(span_processor)
+trace.set_tracer_provider(tracer_provider)
+
+# Instrument Flask app
+FlaskInstrumentor().instrument_app(app)
+
+# Instrument SQLAlchemy
+SQLAlchemyInstrumentor().instrument(engine=engine)
+
+# Instrument requests
+RequestsInstrumentor().instrument()
 
 @app.route('/discovery', methods=['GET'])
 def discovery():
