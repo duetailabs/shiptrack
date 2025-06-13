@@ -3,3 +3,4 @@
 **/__pycache__
 **/include
 pyvenv.cfg
+**/lib64
