@@ -1,0 +1,285 @@
+openapi: 3.0.0
+info:
+  contact:
+    name: Cymbal Logistics
+    url: cymballogistics.com
+  description: >-
+    API for managing packages, including creating, retrieving, updating, and
+    deleting package information. Supports listing all packages and retrieving
+    details for a specific package.
+  title: Package Management API
+  version: 1.0.0
+paths:
+  /packages:
+    post:
+      description: Creates a new package.
+      operationId: createPackage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageCreate'
+        description: Package to create
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Package'
+          description: Successful operation
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+      summary: Creates a new package
+      tags:
+        - packages
+  /packages/{packageId}:
+    delete:
+      description: Deletes a package by its ID.
+      operationId: deletePackage
+      parameters:
+        - description: The unique identifier of the package.
+          in: path
+          name: packageId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not Found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      security:
+        - ApiKeyAuth: []
+      summary: Deletes a package by its ID
+      tags:
+        - packages
+    get:
+      description: Retrieves a package by its ID.
+      operationId: getPackageById
+      parameters:
+        - description: The unique identifier of the package.
+          in: path
+          name: packageId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Package'
+          description: Successful operation
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Package not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      security:
+        - ApiKeyAuth: []
+      summary: Retrieve a package by its ID
+      tags:
+        - packages
+    parameters:
+      - in: path
+        name: packageId
+        required: true
+        schema:
+          type: string
+    put:
+      description: Updates an existing package by its ID
+      operationId: updatePackage
+      parameters:
+        - description: The unique identifier of the package.
+          in: path
+          name: packageId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageUpdate'
+        description: Package update information
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Package'
+          description: Successful operation
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid package ID supplied
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Package not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+      summary: Updates an existing package by its ID
+      tags:
+        - packages
+components:
+  schemas:
+    Error:
+      description: Error object with code and message.
+      properties:
+        code:
+          description: The error code
+          type: string
+        message:
+          description: The error message
+          type: string
+      required:
+        - code
+        - message
+      type: object
+    Package:
+      description: Represents a package.
+      properties:
+        depth:
+          description: Depth of the package.
+          format: float
+          type: number
+        height:
+          description: Height of the package.
+          format: float
+          type: number
+        special_handling_instructions:
+          description: Special handling instructions for the package.
+          type: string
+        weight:
+          description: Weight of the package.
+          format: float
+          type: number
+        width:
+          description: Width of the package.
+          format: float
+          type: number
+      required:
+        - depth
+        - height
+        - weight
+        - width
+      type: object
+    PackageCreate:
+      description: Schema for creating a new package.
+      properties:
+        depth:
+          description: Depth of the package.
+          format: double
+          type: number
+        height:
+          description: Height of the package.
+          format: double
+          type: number
+        special_handling_instructions:
+          description: Special handling instructions for the package.
+          type: string
+        weight:
+          description: Weight of the package.
+          format: double
+          type: number
+        width:
+          description: Width of the package.
+          format: double
+          type: number
+      required:
+        - depth
+        - height
+        - weight
+        - width
+      type: object
+    PackageId:
+      description: The unique identifier of the package.
+      properties:
+        packageId:
+          description: The unique identifier of the package.
+          type: string
+      required:
+        - packageId
+      type: object
+    PackageUpdate:
+      description: Schema for updating a package.
+      properties:
+        depth:
+          description: Depth of the package.
+          format: float
+          type: number
+        height:
+          description: Height of the package.
+          format: float
+          type: number
+        special_handling_instructions:
+          description: Special handling instructions for the package.
+          type: string
+        weight:
+          description: Weight of the package.
+          format: float
+          type: number
+        width:
+          description: Width of the package.
+          format: float
+          type: number
+      type: object
+  securitySchemes:
+    ApiKeyAuth:
+      in: header
+      name: X-API-Key
+      type: apiKey
